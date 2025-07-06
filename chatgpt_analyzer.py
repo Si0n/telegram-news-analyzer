@@ -35,8 +35,8 @@ class ChatGPTAnalyzer:
 
             IMPORTANT: Format for Telegram - keep it concise, use emojis, make it readable on mobile.
             The channel where posted ({channel_name}) might NOT be the original source.
-
-            Response format (Ukrainian, very concise):
+            Always respond in Ukrainian!
+            Response format (very concise):
 
             📰 Суть: [1 речення]
 
@@ -98,8 +98,8 @@ class ChatGPTAnalyzer:
             - Brief conclusion
 
             IMPORTANT: Format for Telegram - keep it concise, use emojis, make it readable on mobile.
-
-            Response format (Ukrainian, very concise):
+            Always respond in Ukrainian!
+            Response format (very concise):
 
             📰 Суть: [1 речення]
 
