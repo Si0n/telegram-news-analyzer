@@ -70,11 +70,15 @@ class ChatGPTAnalyzer:
             if custom_prompt:
                 # Use custom prompt if provided
                 prompt = f"""
+                
+                Important: You must answer in Ukrainian language only.
 
                 Channel: {channel_name}
                 Message: {post_text}
+                Question: {custom_prompt}
+                
                 """
-                messages.append({"role": "system", "content": custom_prompt})
+                messages.append({"role": "system", "content": "You are a helpful assistant, you will receive a Message, Channel and a Question about the Message, Answer please on the Question(-s)."})
             else:
                 # Use default prompt
                 prompt = DEFAULT_PROMPT
@@ -113,10 +117,16 @@ class ChatGPTAnalyzer:
             # Create a prompt for image analysis
             if custom_prompt:
                 prompt = f"""
+                Important: You must answer in Ukrainian language only.
+                
                 Channel: {channel_name}
                 Caption: {caption or "No text provided"}
+                Question: {custom_prompt}
                 """
                 messages.append({"role": "system", "content": custom_prompt})
+
+                messages.append({"role": "system",
+                                 "content": "You are a helpful assistant, you will receive a Message, Channel and a Question about the Message, Answer please on the Question(-s)."})
             else:
                 # Use default prompt
                 prompt = DEFAULT_PROMPT + f"""
