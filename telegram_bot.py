@@ -183,7 +183,7 @@ I analyze posts shared from channels using ChatGPT to provide:
                 channel_info = "Unknown Channel"
             
             # Send processing message
-            processing_msg = await first_message.reply_text("🔍 Analyzing the media group... Please wait.")
+            processing_msg = await first_message.reply_text("🔍 Аналізую пост... Очікуйте.")
             
             # Collect all images from all messages in the group
             all_image_urls = []
@@ -237,7 +237,7 @@ I analyze posts shared from channels using ChatGPT to provide:
                 channel_info = "Unknown Channel"
             
             # Send processing message
-            processing_msg = await reply_message.reply_text("🔍 Analyzing the post... Please wait.")
+            processing_msg = await reply_message.reply_text("🔍 Аналізую пост... Очікуйте.")
             
             # Analyze based on content type
             if message.text and not message.photo and not message.video and not message.document and not message.audio and not message.voice and not message.video_note:
