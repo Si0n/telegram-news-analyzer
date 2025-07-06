@@ -65,31 +65,27 @@ class ChatGPTAnalyzer:
             str: Analysis result from ChatGPT
         """
         try:
+            messages = []
             # Create a prompt for analysis
             if custom_prompt:
                 # Use custom prompt if provided
                 prompt = f"""
 
-                Custom instruction: {custom_prompt} 
-                If you don't have enough information, just say "Sorry, I don't have enough information to respond to this"
-                If you are not able to respond properly - just say "Sorry, I can't respond to this"
-                If you are not sure about the information - just say "Sorry, I'm not sure about this"
-
                 Channel: {channel_name}
-                Content: {post_text}
+                Message: {post_text}
                 """
+                messages.append({"role": "system", "content": custom_prompt})
             else:
                 # Use default prompt
                 prompt = DEFAULT_PROMPT
+                messages.append({"role": "system", "content": 'You are a master of information warfare, an expert in detecting propaganda, manipulation, and fake news.'})
+            
+            messages.append({"role": "user", "content": prompt})
 
             # Call ChatGPT API
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
-                messages=[
-                    {"role": "system",
-                     "content": "Ти — майстер аналізу інформаційної війни, експерт з виявлення пропаганди, маніпуляцій і фейків"},
-                    {"role": "user", "content": prompt}
-                ],
+                messages=messages,
                 max_tokens=500,
                 temperature=0.7
             )
@@ -113,37 +109,31 @@ class ChatGPTAnalyzer:
             str: Analysis result from ChatGPT
         """
         try:
+            messages = []
             # Create a prompt for image analysis
             if custom_prompt:
-                # Use custom prompt if provided
                 prompt = f"""
-                Custom instruction: {custom_prompt} 
-                If you don't have enough information, just say "Sorry, I don't have enough information to respond to this"
-                If you are not able to respond properly - just say "Sorry, I can't respond to this"
-                If you are not sure about the information - just say "Sorry, I'm not sure about this"
-
                 Channel: {channel_name}
                 Caption: {caption or "No text provided"}
                 """
+                messages.append({"role": "system", "content": custom_prompt})
             else:
                 # Use default prompt
                 prompt = DEFAULT_PROMPT + f"""
                 Caption: {caption or "No text provided"}
                 """
+                messages.append({"role": "system", "content": 'You are a master of information warfare, an expert in detecting propaganda, manipulation, and fake news.'})
 
-            # Build the message content for ChatGPT Vision API
             message_content = [{"type": "text", "text": prompt}]
             for url in image_urls:
                 message_content.append({"type": "image_url", "image_url": {"url": url}})
+            
+            messages.append({"role": "user", "content": message_content})
 
             # Call ChatGPT Vision API
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
-                messages=[
-                    {"role": "system",
-                     "content": "Ти — майстер аналізу інформаційної війни, експерт з виявлення пропаганди, маніпуляцій і фейків"},
-                    {"role": "user", "content": message_content}
-                ],
+                messages=messages,
                 max_tokens=500,
                 temperature=0.7
             )
