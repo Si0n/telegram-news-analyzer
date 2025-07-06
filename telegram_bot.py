@@ -66,6 +66,8 @@ I can analyze posts shared from any channel using AI.
 1. Forward any message from a channel to me
 2. I'll analyze the content and provide insights
 3. You can also send me text directly for analysis
+4. In groups/channels: Mention me (@botname) to analyze replied-to messages
+5. Add custom instructions after mentioning me (e.g., "@botname focus on propaganda")
 
 **Supported content:**
 • Text messages
@@ -97,13 +99,21 @@ I analyze posts shared from channels using ChatGPT to provide:
 **How to use:**
 1. **Forward a message** from any channel to me
 2. **Send text directly** for analysis
-3. Wait for my AI-powered analysis
+3. **In groups/channels:** Mention me (@botname) to analyze replied-to messages
+4. **Custom prompts:** Add instructions after mentioning me (e.g., "@botname focus on propaganda detection")
+5. Wait for my AI-powered analysis
 
 **Supported content types:**
 • ✅ Text messages
 • ✅ Images (with or without captions) - full visual analysis
 • ✅ Other media with text captions (text only analysis)
 • ❌ Other media without text (not supported)
+
+**Custom prompts examples:**
+• "@botname analyze this for fake news"
+• "@botname check if this is propaganda"
+• "@botname focus on bias detection"
+• "@botname verify the claims in this post"
 
 **Note:** Make sure you have permission to share the content you're analyzing.
         """
@@ -222,7 +232,38 @@ I analyze posts shared from channels using ChatGPT to provide:
             logger.error(f"Error processing media group: {e}")
             await first_message.reply_text("❌ Вибачте, сталася помилка при аналізі медіа групи. Спробуйте ще раз.")
     
-    async def process_single_message(self, message, context: ContextTypes.DEFAULT_TYPE, original_message=None):
+    def extract_custom_prompt(self, message_text: str, bot_username: str) -> str:
+        """Extract custom prompt from a message that mentions the bot"""
+        try:
+            # Find the bot mention in the message
+            mention_pattern = f"@{bot_username.lower()}"
+            mention_pattern_upper = f"@{bot_username}"
+            
+            # Find the position of the mention
+            mention_pos = -1
+            if mention_pattern in message_text.lower():
+                mention_pos = message_text.lower().find(mention_pattern)
+            elif mention_pattern_upper in message_text:
+                mention_pos = message_text.find(mention_pattern_upper)
+            
+            if mention_pos == -1:
+                return ""
+            
+            # Extract text after the mention
+            after_mention = message_text[mention_pos + len(mention_pattern_upper):].strip()
+            
+            # If there's text after the mention, return it as the custom prompt
+            if after_mention:
+                logger.info(f"Extracted custom prompt: '{after_mention}'")
+                return after_mention
+            
+            return ""
+            
+        except Exception as e:
+            logger.error(f"Error extracting custom prompt: {e}")
+            return ""
+
+    async def process_single_message(self, message, context: ContextTypes.DEFAULT_TYPE, original_message=None, custom_prompt: str = ""):
         """Process a single message (not part of a media group)"""
         try:
             # Use original_message for sending replies if provided (for mock messages)
@@ -242,7 +283,7 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Analyze based on content type
             if message.text and not message.photo and not message.video and not message.document and not message.audio and not message.voice and not message.video_note:
                 # Pure text message
-                analysis = await self.analyzer.analyze_post(message.text, channel_info)
+                analysis = await self.analyzer.analyze_post(message.text, channel_info, custom_prompt)
             elif message.photo:
                 # Single image post - use ChatGPT Vision API
                 image_urls = []
@@ -251,12 +292,12 @@ I analyze posts shared from channels using ChatGPT to provide:
                     if url:
                         image_urls.append(url)
                 if image_urls:
-                    analysis = await self.analyzer.analyze_image_post(image_urls, message.caption if message.caption else "", channel_info)
+                    analysis = await self.analyzer.analyze_image_post(image_urls, message.caption if message.caption else "", channel_info, custom_prompt)
                 else:
                     analysis = "❌ Не вдалося отримати зображення для аналізу."
             elif message.caption and (message.video or message.document or message.audio or message.voice or message.video_note):
                 # Other media types with caption - analyze only the text
-                analysis = await self.analyzer.analyze_post(message.caption, channel_info)
+                analysis = await self.analyzer.analyze_post(message.caption, channel_info, custom_prompt)
             else:
                 # Unsupported media without text
                 analysis = "❌ Цей тип медіа не підтримується для аналізу. Надішліть текст або зображення."
@@ -387,6 +428,14 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Ignore if replying to the bot's own message
             if message.reply_to_message and self.bot_id and getattr(message.reply_to_message.from_user, 'id', None) == self.bot_id:
                 return
+            
+            # Extract custom prompt from the mention message
+            custom_prompt = self.extract_custom_prompt(message.text, bot_username)
+            if custom_prompt:
+                logger.info(f"Custom prompt extracted: '{custom_prompt}'")
+            else:
+                logger.info("No custom prompt found, using default analysis")
+            
             # Prefer to analyze the replied-to message
             if message.reply_to_message:
                 logger.info("Reply detected, analyzing replied-to message")
@@ -425,7 +474,7 @@ I analyze posts shared from channels using ChatGPT to provide:
             else:
                 logger.info("No reply detected, analyzing current message")
                 target_message = message
-            await self.process_single_message(target_message, context, original_message=message)
+            await self.process_single_message(target_message, context, original_message=message, custom_prompt=custom_prompt)
         except Exception as e:
             logger.error(f"Error handling group mention: {e}")
             await update.message.reply_text("❌ Вибачте, сталася помилка при аналізі згаданого поста. Спробуйте ще раз.")
@@ -453,6 +502,13 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Ignore if replying to the bot's own message
             if message.reply_to_message and self.bot_id and getattr(message.reply_to_message.from_user, 'id', None) == self.bot_id:
                 return
+            
+            # Extract custom prompt from the mention message
+            custom_prompt = self.extract_custom_prompt(message.text, bot_username)
+            if custom_prompt:
+                logger.info(f"Custom prompt extracted: '{custom_prompt}'")
+            else:
+                logger.info("No custom prompt found, using default analysis")
                 
             logger.info("Bot mentioned in channel, starting analysis...")
             # In channels, prefer to analyze the replied-to message if it exists
@@ -493,7 +549,7 @@ I analyze posts shared from channels using ChatGPT to provide:
             else:
                 logger.info("No reply detected, analyzing current message")
                 target_message = message
-            await self.process_single_message(target_message, context, original_message=message)
+            await self.process_single_message(target_message, context, original_message=message, custom_prompt=custom_prompt)
         except Exception as e:
             logger.error(f"Error handling channel mention: {e}")
             await update.message.reply_text("❌ Вибачте, сталася помилка при аналізі згаданого поста. Спробуйте ще раз.")

@@ -6,62 +6,88 @@ from config import OPENAI_API_KEY, OPENAI_MODEL
 openai.api_key = OPENAI_API_KEY
 
 
+
+DEFAULT_PROMPT = """
+Твоє завдання — швидко й точно оцінити новинний або соціальний пост.
+
+🔧 Інструкції:
+1. Відповідай **тільки українською мовою**.
+2. Формат має бути **короткий, структурований, зручний для читання на мобільному в Telegram**.
+3. Використовуй емодзі, щоб розділити блоки.
+4. Якщо є посилання або згадка про джерело — **охарактеризуй** його (офіційне / фейкове / пропаганда / жовта преса / експерт / блог тощо).
+5. Якщо джерело — репост, спробуй визначити **оригінал**.
+6. Завжди відповідай, навіть якщо це мем, жарт або емоційний вкид.
+7. Особливо звертай увагу на теми війни та паніки.
+
+📥 Аналізуй наступний пост:
+<POST>: {post_text} </POST>
+<CHANNEL>: {channel_name} </CHANNEL>
+
+📤 Формат відповіді:
+
+📰 **Суть:** [одне коротке речення з резюме]
+
+📊 **Оцінка (0–100%):**
+• Пропаганда: XX% – [1 речення]
+• Брехня: XX% – [1 речення]
+• Емоційна маніпуляція: XX% – [1 речення]
+• Токсичність: XX% – [1 речення]
+• Воєнна паніка: XX% – [1 речення]
+• Шітпостинг/тролінг: XX% – [1 речення]
+
+🔍 **Джерело:** [назва джерела або каналу] — [тип: офіційне / жовта преса / плітки / бот / пропаганда / російське / анонімне / тощо]
+
+📑 **Перевірка фактів:**  
+• [твердження 1]: правда / брехня / не перевірено  
+• [твердження 2]: ...
+
+✅ **Висновок:** [1–2 речення з загальною оцінкою і порадою читачу]
+
+📎 Якщо доречно — додай попередження, напр.:
+⚠️ *Цей канал часто поширює паніку, вкиди або неперевірену інформацію.*
+"""
+
+
 class ChatGPTAnalyzer:
     def __init__(self):
         self.client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
-    async def analyze_post(self, post_text: str, channel_name: str = "Unknown") -> str:
+    async def analyze_post(self, post_text: str, channel_name: str = "Unknown", custom_prompt: str = "") -> str:
         """
         Analyze a post using ChatGPT API
         
         Args:
             post_text (str): The text content of the post to analyze
             channel_name (str): Name of the channel where the post was shared
+            custom_prompt (str): Custom prompt to use for analysis (optional)
             
         Returns:
             str: Analysis result from ChatGPT
         """
         try:
             # Create a prompt for analysis
-            prompt = f"""
-            Analyze the following news post for Telegram.
+            if custom_prompt:
+                # Use custom prompt if provided
+                prompt = f"""
 
-            Your task:
-            - Briefly retell the essence (1 sentence)
-            - Assess propaganda, lies, shitposting with percentages
-            - Identify and characterize the source
-            - Check key claims
-            - Brief conclusion
+                Custom instruction: {custom_prompt} 
+                If you don't have enough information, just say "Sorry, I don't have enough information to respond to this"
+                If you are not able to respond properly - just say "Sorry, I can't respond to this"
+                If you are not sure about the information - just say "Sorry, I'm not sure about this"
 
-            IMPORTANT: Format for Telegram - keep it concise, use emojis, make it readable on mobile.
-            The channel where posted ({channel_name}) might NOT be the original source.
-            Always respond in Ukrainian!
-            Response format (very concise):
-
-            📰 Суть: [1 речення]
-
-            ⚠️ Оцінка:
-            • Пропаганда: XX% - [коротко]
-            • Брехня: XX% - [коротко]  
-            • Шітпостінг: XX% - [коротко]
-            • Тупість: XX% - [коротко]
-
-            🔍 Джерело: [назва] - [характеристика]
-
-            ✅ Перевірка: [основні твердження - правда/брехня/не перевірено]
-
-            📊 Висновок: [1-2 речення]
-
-            Channel: {channel_name}
-            Content: {post_text}
-            """
+                Channel: {channel_name}
+                Content: {post_text}
+                """
+            else:
+                # Use default prompt
+                prompt = DEFAULT_PROMPT
 
             # Call ChatGPT API
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=[
                     {"role": "system",
-                     "content": "You are a helpful assistant that analyzes social media posts and provides insightful commentary."},
+                     "content": "Ти — майстер аналізу інформаційної війни, експерт з виявлення пропаганди, маніпуляцій і фейків"},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=500,
@@ -73,7 +99,7 @@ class ChatGPTAnalyzer:
         except Exception as e:
             return f"Error analyzing post: {str(e)}"
 
-    async def analyze_image_post(self, image_urls: list, caption: str, channel_name: str = "Unknown") -> str:
+    async def analyze_image_post(self, image_urls: list, caption: str, channel_name: str = "Unknown", custom_prompt: str = "") -> str:
         """
         Analyze an image post using ChatGPT Vision API (supports multiple images)
         
@@ -81,43 +107,29 @@ class ChatGPTAnalyzer:
             image_urls (list): List of image URLs to analyze
             caption (str): The caption or description of the images
             channel_name (str): Name of the channel where the post was shared
+            custom_prompt (str): Custom prompt to use for analysis (optional)
             
         Returns:
             str: Analysis result from ChatGPT
         """
         try:
             # Create a prompt for image analysis
-            prompt = f"""
-            Analyze the following news post with images for Telegram.
+            if custom_prompt:
+                # Use custom prompt if provided
+                prompt = f"""
+                Custom instruction: {custom_prompt} 
+                If you don't have enough information, just say "Sorry, I don't have enough information to respond to this"
+                If you are not able to respond properly - just say "Sorry, I can't respond to this"
+                If you are not sure about the information - just say "Sorry, I'm not sure about this"
 
-            Your task:
-            - Briefly retell the essence (1 sentence)
-            - Assess propaganda, lies, shitposting with percentages
-            - Identify and characterize the source
-            - Check key claims
-            - Brief conclusion
-
-            IMPORTANT: Format for Telegram - keep it concise, use emojis, make it readable on mobile.
-            Always respond in Ukrainian!
-            Response format (very concise):
-
-            📰 Суть: [1 речення]
-
-            ⚠️ Оцінка:
-            • Пропаганда: XX% - [коротко]
-            • Брехня: XX% - [коротко]  
-            • Шітпостінг: XX% - [коротко]
-            • Тупість: XX% - [коротко]
-
-            🔍 Джерело: [назва] - [характеристика]
-
-            ✅ Перевірка: [основні твердження - правда/брехня/не перевірено]
-
-            📊 Висновок: [1-2 речення]
-
-            Channel: {channel_name}
-            Caption: {caption or "No text provided"}
-            """
+                Channel: {channel_name}
+                Caption: {caption or "No text provided"}
+                """
+            else:
+                # Use default prompt
+                prompt = DEFAULT_PROMPT + f"""
+                Caption: {caption or "No text provided"}
+                """
 
             # Build the message content for ChatGPT Vision API
             message_content = [{"type": "text", "text": prompt}]
@@ -129,7 +141,7 @@ class ChatGPTAnalyzer:
                 model=OPENAI_MODEL,
                 messages=[
                     {"role": "system",
-                     "content": "You are a helpful assistant that analyzes social media posts and provides insightful commentary."},
+                     "content": "Ти — майстер аналізу інформаційної війни, експерт з виявлення пропаганди, маніпуляцій і фейків"},
                     {"role": "user", "content": message_content}
                 ],
                 max_tokens=500,
