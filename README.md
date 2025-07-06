@@ -19,6 +19,8 @@ A Python Telegram bot that analyzes posts shared from channels using ChatGPT API
 
 ## Installation
 
+### Local Development Installation
+
 1. **Clone or download the project files**
 
 2. **Install dependencies:**
@@ -33,6 +35,146 @@ A Python Telegram bot that analyzes posts shared from channels using ChatGPT API
    TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
    OPENAI_API_KEY=your_openai_api_key_here
    ```
+
+### Ubuntu Server Installation
+
+#### Prerequisites
+- Ubuntu 20.04 LTS or higher
+- Python 3.8 or higher
+- Git
+- Supervisor (for process management)
+
+#### Step-by-Step Installation
+
+1. **Update system packages:**
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   ```
+
+2. **Install Python and required packages:**
+   ```bash
+   sudo apt install -y python3 python3-pip python3-venv git supervisor
+   ```
+
+3. **Create a dedicated user for the bot (recommended):**
+   ```bash
+   sudo adduser dobby
+   sudo usermod -aG sudo dobby
+   ```
+
+4. **Switch to the dobby user:**
+   ```bash
+   sudo su - dobby
+   ```
+
+5. **Clone the repository:**
+   ```bash
+   cd /home/dobby
+   git clone https://github.com/yourusername/dobby.news.git
+   cd dobby.news
+   ```
+
+6. **Create and activate virtual environment:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+7. **Install Python dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+8. **Set up environment variables:**
+   ```bash
+   cp env.example .env
+   nano .env
+   ```
+   
+   Edit the `.env` file with your actual API keys:
+   ```env
+   TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
+
+9. **Test the bot:**
+   ```bash
+   python3 telegram_bot.py
+   ```
+   
+   Press `Ctrl+C` to stop the test.
+
+10. **Configure Supervisor for automatic startup:**
+    
+    Copy the supervisor configuration:
+    ```bash
+    sudo cp supervisor.conf /etc/supervisor/conf.d/dobby-bot.conf
+    ```
+    
+    Update the supervisor configuration to use the correct paths:
+    ```bash
+    sudo nano /etc/supervisor/conf.d/dobby-bot.conf
+    ```
+    
+    Update the paths in the file:
+    ```ini
+    [program:dobby-bot]
+    command=/home/dobby/dobby.news/venv/bin/python /home/dobby/dobby.news/telegram_bot.py
+    directory=/home/dobby/dobby.news
+    user=dobby
+    autostart=true
+    autorestart=true
+    stderr_logfile=/var/log/dobby-bot.err.log
+    stdout_logfile=/var/log/dobby-bot.out.log
+    environment=PYTHONPATH="/home/dobby/dobby.news"
+    redirect_stderr=true
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=5
+    stderr_logfile_maxbytes=10MB
+    stderr_logfile_backups=5
+    stopasgroup=true
+    killasgroup=true
+    ```
+
+11. **Create log files and set permissions:**
+    ```bash
+    sudo touch /var/log/dobby-bot.err.log /var/log/dobby-bot.out.log
+    sudo chown dobby:dobby /var/log/dobby-bot.*.log
+    ```
+
+12. **Reload supervisor and start the bot:**
+    ```bash
+    sudo supervisorctl reread
+    sudo supervisorctl update
+    sudo supervisorctl start dobby-bot
+    ```
+
+13. **Check bot status:**
+    ```bash
+    sudo supervisorctl status dobby-bot
+    ```
+
+14. **View logs (optional):**
+    ```bash
+    sudo tail -f /var/log/dobby-bot.out.log
+    ```
+
+#### Managing the Bot Service
+
+- **Start the bot:** `sudo supervisorctl start dobby-bot`
+- **Stop the bot:** `sudo supervisorctl stop dobby-bot`
+- **Restart the bot:** `sudo supervisorctl restart dobby-bot`
+- **Check status:** `sudo supervisorctl status dobby-bot`
+- **View logs:** `sudo tail -f /var/log/dobby-bot.out.log`
+- **View error logs:** `sudo tail -f /var/log/dobby-bot.err.log`
+
+#### Firewall Configuration (if needed)
+
+If you're running a firewall, ensure it allows outbound connections:
+```bash
+sudo ufw allow out 443/tcp  # HTTPS for API calls
+sudo ufw allow out 80/tcp   # HTTP for API calls
+```
 
 ## Setup Instructions
 

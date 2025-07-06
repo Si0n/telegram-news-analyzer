@@ -26,6 +26,7 @@ class TelegramBot:
         self.analyzer = ChatGPTAnalyzer()
         self.application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
         self.media_groups = {}  # Store media groups being processed
+        self.bot_id = None  # Will be set at startup
         self.setup_handlers()
     
     def setup_handlers(self):
@@ -137,6 +138,10 @@ I analyze posts shared from channels using ChatGPT to provide:
             
             # Check if message exists
             if not message:
+                return
+            
+            # Ignore if forwarded from the bot itself
+            if message.forward_from and self.bot_id and message.forward_from.id == self.bot_id:
                 return
             
             # Check if this is part of a media group
@@ -307,7 +312,7 @@ I analyze posts shared from channels using ChatGPT to provide:
                 return
             
             # Send processing message
-            processing_msg = await message.reply_text("🔍 Analyzing your text... Please wait.")
+            processing_msg = await message.reply_text("🔍 Аналізую пост... Очікуйте.")
             
             # Analyze the text
             analysis = await self.analyzer.analyze_post(message.text, "Direct Message")
@@ -401,6 +406,9 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Check if the bot is actually mentioned
             if not any(entity.type == "mention" and message.text[entity.offset:entity.offset+entity.length].lower() == f"@{bot_username.lower()}" for entity in message.entities or []):
                 return
+            # Ignore if replying to the bot's own message
+            if message.reply_to_message and self.bot_id and getattr(message.reply_to_message.from_user, 'id', None) == self.bot_id:
+                return
             # Prefer to analyze the replied-to message
             if message.reply_to_message:
                 logger.info("Reply detected, analyzing replied-to message")
@@ -462,6 +470,10 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Check if the bot is actually mentioned
             if not any(entity.type == "mention" and message.text[entity.offset:entity.offset+entity.length].lower() == f"@{bot_username.lower()}" for entity in message.entities or []):
                 logger.info("Bot not actually mentioned in channel message")
+                return
+                
+            # Ignore if replying to the bot's own message
+            if message.reply_to_message and self.bot_id and getattr(message.reply_to_message.from_user, 'id', None) == self.bot_id:
                 return
                 
             logger.info("Bot mentioned in channel, starting analysis...")
@@ -596,6 +608,9 @@ I analyze posts shared from channels using ChatGPT to provide:
         logger.info("=== STARTING TELEGRAM BOT ===")
         logger.info("Bot is initializing...")
         await self.application.initialize()
+        # Get bot id
+        me = await self.application.bot.get_me()
+        self.bot_id = me.id
         await self.application.start()
         await self.application.updater.start_polling()
         
