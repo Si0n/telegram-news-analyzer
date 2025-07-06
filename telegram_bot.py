@@ -34,47 +34,25 @@ class TelegramBot:
         # Command handlers
         self.application.add_handler(CommandHandler("start", self.start_command))
         self.application.add_handler(CommandHandler("help", self.help_command))
-        
-        # Message handlers for forwarded messages and channel posts
+        # Message handlers for forwarded messages and channel posts (private chats only)
         self.application.add_handler(MessageHandler(
-            filters.FORWARDED | filters.ChatType.CHANNEL, 
+            filters.FORWARDED & filters.ChatType.PRIVATE,
             self.handle_forwarded_message
         ))
-        
-        # Handler for regular messages (for testing)
+        # Handler for regular messages (for testing, private chats only)
         self.application.add_handler(MessageHandler(
-            filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, 
+            filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE,
             self.handle_text_message
         ))
-        
         # Handler for group and channel mentions
         self.application.add_handler(MessageHandler(
             (filters.ChatType.GROUPS | filters.ChatType.SUPERGROUP) & filters.TEXT & filters.Entity("mention"),
             self.handle_group_mention
         ))
-        
         # Handler for channel mentions (separate from groups)
         self.application.add_handler(MessageHandler(
             filters.ChatType.CHANNEL & filters.TEXT & filters.Entity("mention"),
             self.handle_channel_mention
-        ))
-        
-        # Debug handler to catch all channel messages
-        self.application.add_handler(MessageHandler(
-            filters.ChatType.CHANNEL,
-            self.debug_channel_message
-        ))
-        
-        # Catch-all debug handler for any message
-        self.application.add_handler(MessageHandler(
-            filters.ALL,
-            self.debug_all_messages
-        ))
-        
-        # Simple test handler for any text message
-        self.application.add_handler(MessageHandler(
-            filters.TEXT,
-            self.test_handler
         ))
     
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -383,9 +361,9 @@ I analyze posts shared from channels using ChatGPT to provide:
         escaped_channel = escape_html(channel_info)
         
         formatted = f"""
-📊 <b>Post Analysis</b>
+📊 <b>Аналіз посту</b>
 
-<b>Source:</b> {escaped_channel}
+<b>Джерело:</b> {escaped_channel}
 
 {escaped_analysis}
 
@@ -519,89 +497,6 @@ I analyze posts shared from channels using ChatGPT to provide:
         except Exception as e:
             logger.error(f"Error handling channel mention: {e}")
             await update.message.reply_text("❌ Вибачте, сталася помилка при аналізі згаданого поста. Спробуйте ще раз.")
-    
-    async def debug_channel_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Debug handler to catch all channel messages"""
-        try:
-            message = update.message
-            if not message:
-                logger.info("Debug: Channel message with no message object")
-                return
-                
-            logger.info(f"Debug: Channel message received")
-            logger.info(f"Chat ID: {message.chat_id}")
-            logger.info(f"Chat type: {message.chat.type}")
-            logger.info(f"Message text: {message.text}")
-            logger.info(f"Message entities: {message.entities}")
-            logger.info(f"From user: {message.from_user}")
-            
-            # Check if bot is mentioned
-            bot_username = (await context.bot.get_me()).username
-            logger.info(f"Bot username: @{bot_username}")
-            
-            if message.entities:
-                for entity in message.entities:
-                    if entity.type == "mention":
-                        mention_text = message.text[entity.offset:entity.offset+entity.length]
-                        logger.info(f"Found mention: {mention_text}")
-                        if mention_text.lower() == f"@{bot_username.lower()}":
-                            logger.info("Bot mention detected in debug handler!")
-                        else:
-                            logger.info(f"Mention doesn't match bot username")
-            
-        except Exception as e:
-            logger.error(f"Error in debug channel message: {e}")
-    
-    async def debug_all_messages(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Catch-all debug handler for any message"""
-        try:
-            message = update.message
-            if not message:
-                logger.info("Debug ALL: No message object")
-                return
-                
-            logger.info(f"=== DEBUG ALL MESSAGE ===")
-            logger.info(f"Chat ID: {message.chat_id}")
-            logger.info(f"Chat type: {message.chat.type}")
-            logger.info(f"Chat title: {message.chat.title}")
-            logger.info(f"Message text: {message.text}")
-            logger.info(f"Message entities: {message.entities}")
-            logger.info(f"From user: {message.from_user}")
-            logger.info(f"Reply to message: {message.reply_to_message is not None}")
-            
-            # Check if bot is mentioned
-            bot_username = (await context.bot.get_me()).username
-            logger.info(f"Bot username: @{bot_username}")
-            
-            if message.entities:
-                for entity in message.entities:
-                    logger.info(f"Entity type: {entity.type}, offset: {entity.offset}, length: {entity.length}")
-                    if entity.type == "mention":
-                        mention_text = message.text[entity.offset:entity.offset+entity.length]
-                        logger.info(f"Found mention: {mention_text}")
-                        if mention_text.lower() == f"@{bot_username.lower()}":
-                            logger.info("*** BOT MENTION DETECTED ***")
-                        else:
-                            logger.info(f"Mention doesn't match bot username")
-            
-            logger.info(f"=== END DEBUG ===")
-            
-        except Exception as e:
-            logger.error(f"Error in debug all messages: {e}")
-    
-    async def test_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Simple test handler for any text message"""
-        try:
-            message = update.message
-            if not message:
-                return
-                
-            logger.info(f"TEST HANDLER: Received message in {message.chat.type}")
-            logger.info(f"TEST HANDLER: Chat title: {message.chat.title}")
-            logger.info(f"TEST HANDLER: Message: {message.text[:100]}...")
-            
-        except Exception as e:
-            logger.error(f"Error in test handler: {e}")
     
     async def run(self):
         """Run the bot"""
