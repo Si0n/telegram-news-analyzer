@@ -1,0 +1,8 @@
+This is a project in python.
+
+Should have .env and .env.example files.
+It would be using telegram BOT API. You could install library to use the bot API.
+Put BOT API token in .env file.
+
+What bot should do:
+ - When user shares a post from any channel, it should analyze the post with ChatGPT api and return the analysis.
