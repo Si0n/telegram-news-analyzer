@@ -66,8 +66,10 @@ class ChatGPTAnalyzer:
         """
         try:
             messages = []
+            # Trim custom_prompt and check length
+            custom_prompt = custom_prompt.strip()
             # Create a prompt for analysis
-            if custom_prompt:
+            if len(custom_prompt) > 3:
                 # Use custom prompt if provided
                 prompt = f"""
                 
@@ -114,8 +116,10 @@ class ChatGPTAnalyzer:
         """
         try:
             messages = []
+            # Trim custom_prompt and check length
+            custom_prompt = custom_prompt.strip()
             # Create a prompt for image analysis
-            if custom_prompt:
+            if len(custom_prompt) > 3:
                 prompt = f"""
                 Important: You must answer in Ukrainian language only.
                 
@@ -124,7 +128,6 @@ class ChatGPTAnalyzer:
                 Question: {custom_prompt}
                 """
                 messages.append({"role": "system", "content": custom_prompt})
-
                 messages.append({"role": "system",
                                  "content": "You are a helpful assistant, you will receive a Message, Channel and a Question about the Message, Answer please on the Question(-s)."})
             else:
