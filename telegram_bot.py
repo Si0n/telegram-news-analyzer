@@ -6,7 +6,7 @@ from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 from chatgpt_analyzer import ChatGPTAnalyzer
-from config import TELEGRAM_BOT_TOKEN
+from config import TELEGRAM_BOT_TOKEN, OPENAI_MODEL
 
 # Configure logging
 logging.basicConfig(
@@ -427,7 +427,7 @@ I analyze posts shared from channels using ChatGPT to provide:
 {analysis}
 
 ---
-<i>Analysis powered by ChatGPT</i>
+<i>Analysis powered by ChatGPT ({OPENAI_MODEL})</i>
         """
         return formatted.strip()
 
