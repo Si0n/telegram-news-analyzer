@@ -182,3 +182,22 @@ class ChatGPTAnalyzer:
 
         except Exception as e:
             return f"Error analyzing image post: {str(e)}"
+
+    async def answer_general_question(self, question: str) -> str:
+        """
+        Answer a general user question as a helpful assistant in Ukrainian (HTML for Telegram).
+        """
+        try:
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant. Answer the user's question in Ukrainian. Use only simple HTML tags for formatting if needed."},
+                {"role": "user", "content": question}
+            ]
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=messages,
+                max_tokens=500,
+                temperature=0.7
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            return f"Вибачте, сталася помилка: {str(e)}"

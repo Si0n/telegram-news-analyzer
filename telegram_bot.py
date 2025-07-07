@@ -494,8 +494,11 @@ I analyze posts shared from channels using ChatGPT to provide:
                     logger.info("No quoted text found, analyzing current message")
                     target_message = message
             else:
-                logger.info("No reply detected, analyzing current message")
-                target_message = message
+                # No reply or quote: answer as a general assistant
+                logger.info("No reply or quote detected, answering as a general assistant")
+                answer = await self.analyzer.answer_general_question(message.text)
+                await message.reply_text(answer, parse_mode=ParseMode.HTML)
+                return
             await self.process_single_message(target_message, context, original_message=message,
                                               custom_prompt=custom_prompt)
         except Exception as e:
@@ -574,8 +577,11 @@ I analyze posts shared from channels using ChatGPT to provide:
                     logger.info("No quoted text found, analyzing current message")
                     target_message = message
             else:
-                logger.info("No reply detected, analyzing current message")
-                target_message = message
+                # No reply or quote: answer as a general assistant
+                logger.info("No reply or quote detected, answering as a general assistant")
+                answer = await self.analyzer.answer_general_question(message.text)
+                await message.reply_text(answer, parse_mode=ParseMode.HTML)
+                return
             await self.process_single_message(target_message, context, original_message=message,
                                               custom_prompt=custom_prompt)
         except Exception as e:
