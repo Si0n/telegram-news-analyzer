@@ -10,8 +10,14 @@ openai.api_key = OPENAI_API_KEY
 DEFAULT_PROMPT = """
 Твоє завдання — швидко й точно оцінити новинний або соціальний пост.
 
-Форматування: HTML для Telegram.
-Використовуй тільки прості HTML-теги для Telegram: <b>, <i>, <u>, <s>, <a>, <code>, <pre>. Не додавай зайвих пробілів у тегах. Не використовуй вкладені теги. Не вставляй теги всередину емодзі чи посередині слова. Не додавай зайвих тегів. Всі теги мають бути коректно закриті.
+Formatting: Telegram (HTML format).
+Only allowed formatting tags:
+    Bold => <b>bold</b>, <strong>bold</strong>
+    Italic => <i>italic</i>, <em>italic</em>
+    Code » => <code>code</code>
+    Strike => <s>strike</s>, <strike>strike</strike>, <del>strike</del>
+    Underline => <u>underline</u>
+    Pre » => <pre language="c++">code</pre>
 
 🔧 <b>Інструкції:</b>
 1. Відповідай <b>тільки українською мовою</b>.
@@ -76,7 +82,14 @@ class ChatGPTAnalyzer:
             if len(custom_prompt) > 3:
                 # Use custom prompt if provided
                 prompt = f"""
-                Always use format HTML for Telegram.
+                Formatting: Telegram (HTML format).
+                Only allowed formatting tags:
+                    Bold => <b>bold</b>, <strong>bold</strong>
+                    Italic => <i>italic</i>, <em>italic</em>
+                    Code » => <code>code</code>
+                    Strike => <s>strike</s>, <strike>strike</strike>, <del>strike</del>
+                    Underline => <u>underline</u>
+                    Pre » => <pre language="c++">code</pre>
                 Important: You must answer in Ukrainian language only.
 
                 Channel: {channel_name}
@@ -126,7 +139,14 @@ class ChatGPTAnalyzer:
             # Create a prompt for image analysis
             if len(custom_prompt) > 3:
                 prompt = f"""
-                Always use format HTML for Telegram.
+                Formatting: Telegram (HTML format).
+                Only allowed formatting tags:
+                    Bold => <b>bold</b>, <strong>bold</strong>
+                    Italic => <i>italic</i>, <em>italic</em>
+                    Code » => <code>code</code>
+                    Strike => <s>strike</s>, <strike>strike</strike>, <del>strike</del>
+                    Underline => <u>underline</u>
+                    Pre » => <pre language="c++">code</pre>
                 Important: You must answer in Ukrainian language only.
                 
                 Channel: {channel_name}
