@@ -8,44 +8,39 @@ openai.api_key = OPENAI_API_KEY
 
 
 DEFAULT_PROMPT = """
-Твоє завдання — швидко й точно оцінити новинний або соціальний пост.
+Your task is to quickly and accurately assess a news or social media post.
 
-Інструкції:
-1. Відповідай тільки українською мовою.
-2. Формат має бути короткий, структурований, зручний для читання на мобільному в Telegram.
-3. Використовуй емодзі, щоб розділити блоки інформації.
-4. Якщо є посилання або згадка про джерело, охарактеризуй його (офіційне / фейкове / пропаганда / жовта преса / експерт / блог / тощо).
-5. Якщо джерело — репост, спробуй визначити оригінал.
-6. Завжди відповідай, навіть якщо це мем, жарт або емоційний вкид.
-7. Особливо звертай увагу на теми війни та паніки.
-8. Не використовуй теги для форматування.
+Instructions:
+- Respond only in Ukrainian.
+- The format should be short, structured, and mobile-friendly for Telegram.
+- Use emojis to visually separate information blocks.
+- If there is a link or a source mentioned, describe it (official / fake / propaganda / tabloid / expert / blog / etc.).
+- If the source is a repost, try to identify the original.
+- Always respond, even if the post is a meme, joke, or emotional bait.
+- Pay special attention to topics related to war and panic.
+- IMPORTANT: Do not use any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
 
-📥 Аналізуй наступний пост:
+📥 Analyze the following post:
 CHANNEL: {channel_name}
 POST: {post_text}
 
-📤 Формат відповіді:
+📤 Response Format:
 
-📰 Суть: [одне коротке речення з резюме]
----
-📊 Оцінка (0–100%):
-• Пропаганда: XX% – [1 речення, що пояснює оцінку]
-• Брехня: XX% – [1 речення, що пояснює оцінку]
-• Популізм: XX% – [1 речення, що пояснює оцінку]
-• Емоційна маніпуляція: XX% – [1 речення, що пояснює оцінку]
-• Токсичність: XX% – [1 речення, що пояснює оцінку]
-• Воєнна паніка: XX% – [1 речення, що пояснює оцінку]
-• Шітпостинг/тролінг: XX% – [1 речення, що пояснює оцінку]
----
-🔍 Джерело: [назва джерела або каналу] — [тип: офіційне / жовта преса / плітки / бот / пропаганда / російське / анонімне / тощо]
----
-📑 Перевірка фактів:
-• [твердження 1 з посту]: правда / брехня / не перевірено [та, за необхідності, коротке пояснення або джерело перевірки]
-• [твердження 2 з посту]: ...
----
-✅ Висновок: [1–2 речення з загальною оцінкою і порадою читачу, що робити з цією інформацією]
----
-📎 Попередження: [Якщо доречно — додай попередження, напр.: Цей канал часто поширює паніку, вкиди або неперевірену інформацію.]
+📰 Summary: [one short sentence summarizing the post]
+📊 Assessment (0–100%):
+• Propaganda: XX% – [1 sentence explaining the score]
+• Falsehood: XX% – [1 sentence explaining the score]
+• Populism: XX% – [1 sentence explaining the score]
+• Emotional Manipulation: XX% – [1 sentence explaining the score]
+• Toxicity: XX% – [1 sentence explaining the score]
+• War Panic: XX% – [1 sentence explaining the score]
+• Shitposting/Trolling: XX% – [1 sentence explaining the score]
+🔍 Source: [name of source or channel] — [type: official / tabloid / gossip / bot / propaganda / Russian / anonymous / etc.]
+📑 Fact-Check:
+• [claim 1 from the post]: true / false / unverified [with a brief explanation or fact-check source if needed]
+• [claim 2 from the post]: ...
+✅ Conclusion: [1–2 sentences with the overall judgment and advice for the reader on what to do with the information]
+📎 Warning: [if appropriate — add a warning, e.g., "This channel often spreads panic, disinformation, or unverified content."]
 """
 
 
@@ -73,8 +68,8 @@ class ChatGPTAnalyzer:
             if len(custom_prompt) > 3:
                 # Use custom prompt if provided
                 prompt = f"""
-                Відповідай тільки українською мовою. 
-                Не використовуй теги для форматування.
+                Answer only in Ukrainian.
+                IMPORTANT: Do not use any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
 
                 Channel: {channel_name}
                 Message: {post_text}
@@ -123,8 +118,8 @@ class ChatGPTAnalyzer:
             # Create a prompt for image analysis
             if len(custom_prompt) > 3:
                 prompt = f"""
-                Відповідай тільки українською мовою. 
-                Не використовуй теги для форматування.
+                Answer only in Ukrainian.
+                IMPORTANT: Do not use any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
                 
                 Channel: {channel_name}
                 Post: {post_text}
