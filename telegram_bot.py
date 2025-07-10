@@ -410,16 +410,16 @@ I analyze posts shared from channels using ChatGPT to provide:
 
     def format_analysis(self, analysis: str, channel_info: str) -> str:
         """Format the analysis for better presentation (HTML version)"""
-        return escape_markdown_v2(f"""
+        return f"""
 📊 **Аналіз посту**
 
-**Джерело:** {channel_info}
+**Джерело:** {escape_markdown_v2(channel_info)}
 
 {analysis}
 
 ---
-__Analysis powered by ChatGPT ({OPENAI_MODEL})__
-""").strip()
+__Analysis powered by ChatGPT ({escape_markdown_v2(OPENAI_MODEL)})__
+""".strip()
 
     async def handle_group_mention(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle messages in groups where the bot is mentioned"""
