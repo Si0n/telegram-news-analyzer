@@ -26,10 +26,10 @@ if not root_logger.handlers:
     root_logger.addHandler(handler)
 
 
-
 def escape_markdown_v2(text: str) -> str:
     escape_chars = r'_*\[\]()~`>#+\-=|{}.!'
     return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
+
 
 class TelegramBot:
     def __init__(self):
@@ -410,20 +410,16 @@ I analyze posts shared from channels using ChatGPT to provide:
 
     def format_analysis(self, analysis: str, channel_info: str) -> str:
         """Format the analysis for better presentation (HTML version)"""
-
-        escaped_channel = escape_markdown_v2(channel_info)
-
-        formatted = f"""
+        return escape_markdown_v2(f"""
 📊 **Аналіз посту**
 
-**Джерело:** {escaped_channel}
+**Джерело:** {channel_info}
 
 {analysis}
 
 ---
 __Analysis powered by ChatGPT ({OPENAI_MODEL})__
-        """
-        return formatted.strip()
+""").strip()
 
     async def handle_group_mention(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle messages in groups where the bot is mentioned"""
