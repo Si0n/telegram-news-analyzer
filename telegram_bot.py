@@ -233,7 +233,7 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await first_message.reply_text(analysis, parse_mode=ParseMode.HTML)
+                await first_message.reply_text(analysis, parse_mode=ParseMode.MARKDOWN_V2)
             except Exception as e:
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
                 await first_message.reply_text(analysis, parse_mode=None)
@@ -327,7 +327,7 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await reply_message.reply_text(analysis, parse_mode=ParseMode.HTML)
+                await reply_message.reply_text(analysis, parse_mode=ParseMode.MARKDOWN_V2)
             except Exception as e:
                 # If HTML parsing fails, send without formatting
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
@@ -360,7 +360,7 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await message.reply_text(analysis, parse_mode=ParseMode.HTML)
+                await message.reply_text(analysis, parse_mode=ParseMode.MARKDOWN_V2)
             except Exception as e:
                 # If HTML parsing fails, send without formatting
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
@@ -496,7 +496,7 @@ I analyze posts shared from channels using ChatGPT to provide:
                 answer = await self.analyzer.answer_general_question(message.text)
 
                 logger.info("Answer: " + answer)
-                await message.reply_text(answer, parse_mode=ParseMode.HTML)
+                await message.reply_text(answer, parse_mode=ParseMode.MARKDOWN_V2)
                 return
             await self.process_single_message(target_message, context, original_message=message,
                                               custom_prompt=custom_prompt)
@@ -579,7 +579,7 @@ I analyze posts shared from channels using ChatGPT to provide:
                 # No reply or quote: answer as a general assistant
                 logger.info("No reply or quote detected, answering as a general assistant")
                 answer = await self.analyzer.answer_general_question(message.text)
-                await message.reply_text(answer, parse_mode=ParseMode.HTML)
+                await message.reply_text(answer, parse_mode=ParseMode.MARKDOWN_V2)
                 return
             await self.process_single_message(target_message, context, original_message=message,
                                               custom_prompt=custom_prompt)

@@ -7,7 +7,7 @@ openai.api_key = OPENAI_API_KEY
 
 IMPORTANT_PROMPT = """
 Answer only in Ukrainian.
-IMPORTANT: USE ONLY RAW TEXT (you could use only Telegram Markdown). DO NOT USE HTML formatting tags (e.g., no bold, italics, ol, ul, li etc).
+IMPORTANT: USE ONLY RAW TEXT (you could use only Telegram MARKDOWN_V2). DO NOT USE HTML formatting tags (e.g., no bold, italics, ol, ul, li etc).
 Use emojis to visually separate information blocks.
 
 """
