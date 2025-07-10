@@ -415,7 +415,7 @@ I analyze posts shared from channels using ChatGPT to provide:
 
 **Джерело:** {escape_markdown_v2(channel_info)}
 
-{analysis}
+{escape_markdown_v2(analysis)}
 
 ---
 __Analysis powered by ChatGPT ({escape_markdown_v2(OPENAI_MODEL)})__
