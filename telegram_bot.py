@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 
 from telegram import Update
 from telegram.constants import ParseMode
@@ -24,6 +25,11 @@ if not root_logger.handlers:
     handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     root_logger.addHandler(handler)
 
+
+
+def escape_markdown_v2(text: str) -> str:
+    escape_chars = r'_*\[\]()~`>#+\-=|{}.!'
+    return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
 
 class TelegramBot:
     def __init__(self):
@@ -228,15 +234,16 @@ I analyze posts shared from channels using ChatGPT to provide:
             else:
                 analysis = "❌ Не вдалося отримати зображення для аналізу."
 
-            logger.info("Answer: " + analysis)
+            formatted_answer = self.format_analysis(analysis, channel_info)
+            logger.info("Answer: " + formatted_answer)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await first_message.reply_text(analysis, parse_mode=ParseMode.MARKDOWN_V2)
+                await first_message.reply_text(formatted_answer, parse_mode=ParseMode.MARKDOWN_V2)
             except Exception as e:
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
-                await first_message.reply_text(analysis, parse_mode=None)
+                await first_message.reply_text(formatted_answer, parse_mode=None)
 
             # Mark as processed
             if first_message.media_group_id in self.media_groups:
@@ -322,16 +329,17 @@ I analyze posts shared from channels using ChatGPT to provide:
                 # Unsupported media without text
                 analysis = "❌ Цей тип медіа не підтримується для аналізу. Надішліть текст або зображення."
 
-            logger.info("Answer: " + analysis)
+            formatted_answer = self.format_analysis(analysis, channel_info)
+            logger.info("Answer: " + formatted_answer)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await reply_message.reply_text(analysis, parse_mode=ParseMode.MARKDOWN_V2)
+                await reply_message.reply_text(formatted_answer, parse_mode=ParseMode.MARKDOWN_V2)
             except Exception as e:
                 # If HTML parsing fails, send without formatting
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
-                await reply_message.reply_text(analysis, parse_mode=None)
+                await reply_message.reply_text(formatted_answer, parse_mode=None)
 
         except Exception as e:
             logger.error(f"Error processing single message: {e}")
@@ -355,15 +363,16 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Analyze the text
             analysis = await self.analyzer.analyze_post(message.text, "Direct Message")
 
-            logger.info("Answer: " + analysis)
+            formatted_answer = self.format_analysis(analysis, "Direct Message")
+            logger.info("Answer: " + formatted_answer)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await message.reply_text(analysis, parse_mode=ParseMode.MARKDOWN_V2)
+                await message.reply_text(formatted_answer, parse_mode=ParseMode.MARKDOWN_V2)
             except Exception as e:
                 # If HTML parsing fails, send without formatting
-                logger.warning(f"HTML parsing failed, sending as plain text: {e}")
+                logger.warning(f"Markdown V2 parsing failed, sending as plain text: {e}")
                 await message.reply_text(analysis, parse_mode=None)
 
         except Exception as e:
@@ -402,19 +411,7 @@ I analyze posts shared from channels using ChatGPT to provide:
     def format_analysis(self, analysis: str, channel_info: str) -> str:
         """Format the analysis for better presentation (HTML version)"""
 
-        def escape_html(text: str) -> str:
-            html_escapes = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            }
-            for char, escape in html_escapes.items():
-                text = text.replace(char, escape)
-            return text
-
-        escaped_channel = escape_html(channel_info)
+        escaped_channel = escape_markdown_v2(channel_info)
 
         formatted = f"""
 📊 <b>Аналіз посту</b>
@@ -494,9 +491,10 @@ I analyze posts shared from channels using ChatGPT to provide:
                 # No reply or quote: answer as a general assistant
                 logger.info("No reply or quote detected, answering as a general assistant")
                 answer = await self.analyzer.answer_general_question(message.text)
+                formatted_answer = self.format_analysis(answer, message.chat.title)
 
-                logger.info("Answer: " + answer)
-                await message.reply_text(answer, parse_mode=ParseMode.MARKDOWN_V2)
+                logger.info("Answer: " + formatted_answer)
+                await message.reply_text(formatted_answer, parse_mode=ParseMode.MARKDOWN_V2)
                 return
             await self.process_single_message(target_message, context, original_message=message,
                                               custom_prompt=custom_prompt)
