@@ -414,14 +414,14 @@ I analyze posts shared from channels using ChatGPT to provide:
         escaped_channel = escape_markdown_v2(channel_info)
 
         formatted = f"""
-📊 <b>Аналіз посту</b>
+📊 **Аналіз посту**
 
-<b>Джерело:</b> {escaped_channel}
+**Джерело:** {escaped_channel}
 
 {analysis}
 
 ---
-<i>Analysis powered by ChatGPT ({OPENAI_MODEL})</i>
+__Analysis powered by ChatGPT ({OPENAI_MODEL})__
         """
         return formatted.strip()
 
