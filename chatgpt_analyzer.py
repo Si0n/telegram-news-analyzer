@@ -10,6 +10,8 @@ openai.api_key = OPENAI_API_KEY
 DEFAULT_PROMPT = """
 Your task is to quickly and accurately assess a news or social media post.
 
+IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
+
 Instructions:
 - Respond only in Ukrainian.
 - The format should be short, structured, and mobile-friendly for Telegram.
@@ -18,7 +20,6 @@ Instructions:
 - If the source is a repost, try to identify the original.
 - Always respond, even if the post is a meme, joke, or emotional bait.
 - Pay special attention to topics related to war and panic.
-- IMPORTANT: Do not use any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
 
 📥 Analyze the following post:
 CHANNEL: {channel_name}
@@ -69,7 +70,7 @@ class ChatGPTAnalyzer:
                 # Use custom prompt if provided
                 prompt = f"""
                 Answer only in Ukrainian.
-                IMPORTANT: Do not use any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
+                IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
 
                 Channel: {channel_name}
                 Message: {post_text}
@@ -119,7 +120,7 @@ class ChatGPTAnalyzer:
             if len(custom_prompt) > 3:
                 prompt = f"""
                 Answer only in Ukrainian.
-                IMPORTANT: Do not use any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
+                IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
                 
                 Channel: {channel_name}
                 Post: {post_text}
