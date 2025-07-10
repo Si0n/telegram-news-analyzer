@@ -228,16 +228,15 @@ I analyze posts shared from channels using ChatGPT to provide:
             else:
                 analysis = "❌ Не вдалося отримати зображення для аналізу."
 
-            # Format and send the analysis
-            formatted_analysis = self.format_analysis(analysis, channel_info)
+            logger.info("Answer: " + analysis)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await first_message.reply_text(formatted_analysis, parse_mode=ParseMode.HTML)
+                await first_message.reply_text(analysis, parse_mode=ParseMode.HTML)
             except Exception as e:
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
-                await first_message.reply_text(formatted_analysis, parse_mode=None)
+                await first_message.reply_text(analysis, parse_mode=None)
 
             # Mark as processed
             if first_message.media_group_id in self.media_groups:
@@ -323,17 +322,16 @@ I analyze posts shared from channels using ChatGPT to provide:
                 # Unsupported media without text
                 analysis = "❌ Цей тип медіа не підтримується для аналізу. Надішліть текст або зображення."
 
-            # Format and send the analysis
-            formatted_analysis = self.format_analysis(analysis, channel_info)
+            logger.info("Answer: " + analysis)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await reply_message.reply_text(formatted_analysis, parse_mode=ParseMode.HTML)
+                await reply_message.reply_text(analysis, parse_mode=ParseMode.HTML)
             except Exception as e:
                 # If HTML parsing fails, send without formatting
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
-                await reply_message.reply_text(formatted_analysis, parse_mode=None)
+                await reply_message.reply_text(analysis, parse_mode=None)
 
         except Exception as e:
             logger.error(f"Error processing single message: {e}")
@@ -357,17 +355,16 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Analyze the text
             analysis = await self.analyzer.analyze_post(message.text, "Direct Message")
 
-            # Format and send the analysis
-            formatted_analysis = self.format_analysis(analysis, "Direct Message")
+            logger.info("Answer: " + analysis)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
             try:
-                await message.reply_text(formatted_analysis, parse_mode=ParseMode.HTML)
+                await message.reply_text(analysis, parse_mode=ParseMode.HTML)
             except Exception as e:
                 # If HTML parsing fails, send without formatting
                 logger.warning(f"HTML parsing failed, sending as plain text: {e}")
-                await message.reply_text(formatted_analysis, parse_mode=None)
+                await message.reply_text(analysis, parse_mode=None)
 
         except Exception as e:
             logger.error(f"Error handling text message: {e}")
@@ -497,6 +494,8 @@ I analyze posts shared from channels using ChatGPT to provide:
                 # No reply or quote: answer as a general assistant
                 logger.info("No reply or quote detected, answering as a general assistant")
                 answer = await self.analyzer.answer_general_question(message.text)
+
+                logger.info("Answer: " + answer)
                 await message.reply_text(answer, parse_mode=ParseMode.HTML)
                 return
             await self.process_single_message(target_message, context, original_message=message,
