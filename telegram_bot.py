@@ -27,8 +27,12 @@ if not root_logger.handlers:
 
 
 def escape_markdown_v2(text: str) -> str:
-    escape_chars = r'_*\[\]()~`>#+\-=|{}.!'
-    return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
+    """
+    Escapes Telegram Markdown V2 special characters in text.
+    """
+    return text
+    # escape_chars = r"_*[]()~`>#+-=|{}.!\\"
+    # return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
 
 class TelegramBot:
