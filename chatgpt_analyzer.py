@@ -5,12 +5,12 @@ from config import OPENAI_API_KEY, OPENAI_MODEL
 # Configure OpenAI client
 openai.api_key = OPENAI_API_KEY
 
-
+IMPORTANT_PROMPT = "Answer only in Ukrainian.\n IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).\n"
 
 DEFAULT_PROMPT = """
 Your task is to quickly and accurately assess a news or social media post.
 
-IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
+{important_prompt}
 
 Instructions:
 - Respond only in Ukrainian.
@@ -69,8 +69,7 @@ class ChatGPTAnalyzer:
             if len(custom_prompt) > 3:
                 # Use custom prompt if provided
                 prompt = f"""
-                Answer only in Ukrainian.
-                IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
+                {IMPORTANT_PROMPT}
 
                 Channel: {channel_name}
                 Message: {post_text}
@@ -80,7 +79,7 @@ class ChatGPTAnalyzer:
                 messages.append({"role": "system", "content": "You are a helpful assistant, you will receive a Message, Channel and a Question about the Message, Answer please on the Question(-s)."})
             else:
                 # Use default prompt
-                prompt = DEFAULT_PROMPT.format(post_text=post_text, channel_name=channel_name)
+                prompt = DEFAULT_PROMPT.format(important_prompt=IMPORTANT_PROMPT, post_text=post_text, channel_name=channel_name)
                 messages.append({"role": "system", "content": 'You are a master of information warfare, an expert in detecting propaganda, manipulation, and fake news.'})
             
             messages.append({"role": "user", "content": prompt})
@@ -119,8 +118,7 @@ class ChatGPTAnalyzer:
             # Create a prompt for image analysis
             if len(custom_prompt) > 3:
                 prompt = f"""
-                Answer only in Ukrainian.
-                IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).
+                {IMPORTANT_PROMPT}
                 
                 Channel: {channel_name}
                 Post: {post_text}
@@ -132,7 +130,7 @@ class ChatGPTAnalyzer:
                                  "content": "You are a helpful assistant, you will receive a Message, Channel and a Question about the Message, Answer please on the Question(-s)."})
             else:
                 # Use default prompt
-                prompt = DEFAULT_PROMPT.format(channel_name=channel_name, post_text=post_text) + f"""
+                prompt = DEFAULT_PROMPT.format(important_prompt=IMPORTANT_PROMPT, channel_name=channel_name, post_text=post_text) + f"""
                 Caption: {caption or "No text provided"}
                 """
                 messages.append({"role": "system", "content": 'You are a master of information warfare, an expert in detecting propaganda, manipulation, and fake news.'})
@@ -162,7 +160,10 @@ class ChatGPTAnalyzer:
         """
         try:
             messages = [
-                {"role": "system", "content": "You are a helpful assistant. Answer the user's question in Ukrainian. Use only simple HTML tags for formatting if needed."},
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant. \n {IMPORTANT_PROMPT}"
+                },
                 {"role": "user", "content": question}
             ]
             response = self.client.chat.completions.create(
