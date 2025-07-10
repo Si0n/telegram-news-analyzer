@@ -234,8 +234,9 @@ I analyze posts shared from channels using ChatGPT to provide:
             else:
                 analysis = "❌ Не вдалося отримати зображення для аналізу."
 
-            formatted_answer = self.format_analysis(analysis, channel_info)
-            logger.info("Answer: " + formatted_answer)
+            formatted_answer = self.format_analysis(analysis)
+            logger.info("Answer: " + analysis)
+            logger.info("Formatted Answer: " + formatted_answer)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
@@ -329,8 +330,10 @@ I analyze posts shared from channels using ChatGPT to provide:
                 # Unsupported media without text
                 analysis = "❌ Цей тип медіа не підтримується для аналізу. Надішліть текст або зображення."
 
-            formatted_answer = self.format_analysis(analysis, channel_info)
-            logger.info("Answer: " + formatted_answer)
+            formatted_answer = self.format_analysis(analysis)
+
+            logger.info("Answer: " + analysis)
+            logger.info("Formatted Answer: " + formatted_answer)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
@@ -363,8 +366,10 @@ I analyze posts shared from channels using ChatGPT to provide:
             # Analyze the text
             analysis = await self.analyzer.analyze_post(message.text, "Direct Message")
 
-            formatted_answer = self.format_analysis(analysis, "Direct Message")
-            logger.info("Answer: " + formatted_answer)
+            formatted_answer = self.format_analysis(analysis)
+
+            logger.info("Answer: " + analysis)
+            logger.info("Formatted Answer: " + formatted_answer)
 
             # Delete processing message and send analysis
             await processing_msg.delete()
@@ -408,18 +413,9 @@ I analyze posts shared from channels using ChatGPT to provide:
             logger.error(f"Error fetching message by ID: {e}")
             return None
 
-    def format_analysis(self, analysis: str, channel_info: str) -> str:
+    def format_analysis(self, analysis: str) -> str:
         """Format the analysis for better presentation (HTML version)"""
-        return f"""
-📊 **Аналіз посту**
-
-**Джерело:** {escape_markdown_v2(channel_info)}
-
-{escape_markdown_v2(analysis)}
-
----
-__Analysis powered by ChatGPT ({escape_markdown_v2(OPENAI_MODEL)})__
-""".strip()
+        return escape_markdown_v2(analysis).strip()
 
     async def handle_group_mention(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle messages in groups where the bot is mentioned"""
@@ -487,9 +483,10 @@ __Analysis powered by ChatGPT ({escape_markdown_v2(OPENAI_MODEL)})__
                 # No reply or quote: answer as a general assistant
                 logger.info("No reply or quote detected, answering as a general assistant")
                 answer = await self.analyzer.answer_general_question(message.text)
-                formatted_answer = self.format_analysis(answer, message.chat.title)
+                formatted_answer = self.format_analysis(answer)
 
-                logger.info("Answer: " + formatted_answer)
+                logger.info("Answer: " + answer)
+                logger.info("Formatted Answer: " + formatted_answer)
                 await message.reply_text(formatted_answer, parse_mode=ParseMode.MARKDOWN_V2)
                 return
             await self.process_single_message(target_message, context, original_message=message,

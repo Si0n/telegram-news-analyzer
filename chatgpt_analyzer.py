@@ -7,8 +7,10 @@ openai.api_key = OPENAI_API_KEY
 
 IMPORTANT_PROMPT = """
 Answer only in Ukrainian.
-IMPORTANT: Use only Telegram Markdown V2 formatting in your response. Do not use HTML.
-Use emojis to visually separate information blocks.
+IMPORTANT: 
+1. Use only Telegram Markdown V2 formatting in your response. Do not use HTML.
+2. Output plain text only. Do not escape anything. Do not use backslashes for Markdown. I will handle all Markdown V2 escaping myself.
+3. Use emojis to visually separate information blocks.
 
 """
 
