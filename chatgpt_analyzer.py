@@ -5,7 +5,12 @@ from config import OPENAI_API_KEY, OPENAI_MODEL
 # Configure OpenAI client
 openai.api_key = OPENAI_API_KEY
 
-IMPORTANT_PROMPT = "Answer only in Ukrainian.\n IMPORTANT: USE ONLY RAW TEXT, without any formatting tags (e.g., no bold, italics, ol, ul, li etc, or Markdown).\n"
+IMPORTANT_PROMPT = """
+Answer only in Ukrainian.
+IMPORTANT: USE ONLY RAW TEXT (you could use only Telegram Markdown). DO NOT USE HTML formatting tags (e.g., no bold, italics, ol, ul, li etc).
+Use emojis to visually separate information blocks.
+
+"""
 
 DEFAULT_PROMPT = """
 Your task is to quickly and accurately assess a news or social media post.
@@ -162,7 +167,7 @@ class ChatGPTAnalyzer:
             messages = [
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant. \n {IMPORTANT_PROMPT}"
+                    "content": f"You are the smartest person in the world, you answer the questions (short and accurate). \n {IMPORTANT_PROMPT}"
                 },
                 {"role": "user", "content": question}
             ]
