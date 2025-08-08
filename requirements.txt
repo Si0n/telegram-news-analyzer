@@ -10,7 +10,7 @@ idna==3.10
 jiter==0.10.0
 openai==1.99.4
 pydantic==2.12.0a1
-pydantic_core==2.38.0
+pydantic_core==2.37.2
 python-dotenv==1.1.1
 python-telegram-bot==22.3
 requests==2.32.4
