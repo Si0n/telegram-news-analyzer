@@ -95,7 +95,6 @@ class ChatGPTAnalyzer:
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=messages,
-                max_completion_tokens=500,
                 temperature=1
             )
 
@@ -152,7 +151,6 @@ class ChatGPTAnalyzer:
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=messages,
-                max_completion_tokens=500,
                 temperature=1
             )
 
@@ -176,7 +174,6 @@ class ChatGPTAnalyzer:
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=messages,
-                max_completion_tokens=500,
                 temperature=1
             )
             return response.choices[0].message.content.strip()
