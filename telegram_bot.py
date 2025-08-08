@@ -297,7 +297,7 @@ I analyze posts shared from channels using ChatGPT to provide:
             reply_message = original_message if original_message else message
 
             # Get channel information
-            if message.forward_from_chat:
+            if hasattr(message, 'forward_from_chat') and message.forward_from_chat:
                 channel_name = message.forward_from_chat.title
                 channel_username = message.forward_from_chat.username
                 channel_info = f"@{channel_username}" if channel_username else channel_name
