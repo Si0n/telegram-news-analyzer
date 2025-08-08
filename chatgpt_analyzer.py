@@ -11,6 +11,7 @@ IMPORTANT:
 1. Use only Telegram Markdown V2 formatting in your response. Do not use HTML.
 2. Output plain text only. Do not escape anything. Do not use backslashes for Markdown. I will handle all Markdown V2 escaping myself.
 3. Use emojis to visually separate information blocks.
+4. Maximum response length is 3700 characters.
 
 """
 
@@ -90,12 +91,11 @@ class ChatGPTAnalyzer:
                 messages.append({"role": "system", "content": 'You are a master of information warfare, an expert in detecting propaganda, manipulation, and fake news.'})
             
             messages.append({"role": "user", "content": prompt})
-
             # Call ChatGPT API
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=messages,
-                max_tokens=500,
+                max_completion_tokens=500,
                 temperature=0.7
             )
 
@@ -152,7 +152,7 @@ class ChatGPTAnalyzer:
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=messages,
-                max_tokens=500,
+                max_completion_tokens=500,
                 temperature=0.7
             )
 
@@ -176,7 +176,7 @@ class ChatGPTAnalyzer:
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=messages,
-                max_tokens=500,
+                max_completion_tokens=500,
                 temperature=0.7
             )
             return response.choices[0].message.content.strip()
